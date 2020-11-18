@@ -1,4 +1,4 @@
-## Supreme Ticket Monitor
+## Shopify Monitor
 Hello, I am [Rock](https://www.twitter.com/rockkdev) from the team at [StormeIO](https://www.twitter.com/stormeio) and I have decided to open-source a project of mine. It scans and waits for any changes on any Shopify site. Any product added/restocked will be sent to a webhook provided in the *config.json* file. I kindly ask you to not steal the code and rebrand it, at minimum keep the footer message.
 
 ## Example Images

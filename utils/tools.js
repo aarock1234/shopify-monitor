@@ -63,6 +63,22 @@ module.exports = {
         };
     },
 
+    /**
+     * getRandomArbitrary
+     * 
+     * @param {Number}
+     * @param {Number}
+     * 
+     * @returns random arbitrary number
+     */
+    getRandomArbitrary: (min, max) => {
+        /**
+         * Returns a random arbitrary number between min (inclusive) and max (exclusive).
+         */
+
+        return Math.round(Math.random() * (max - min) + min);
+    },
+
     formatKeywords: (keywords) => {
         if (keywords === null)
             return [];

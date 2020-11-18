@@ -16,33 +16,77 @@ const request = require('request-promise').defaults({
     followRedirect: false,
     headers: safeHeaders
 });
-const { parse: URL } = require('url');
+const _ = require('underscore');
+const { URL: parse } = require('url');
 const events = require('events');
+require('console-stamp')(console, 'HH:MM:ss.l');
 
 const {
     sleep,
-    formatProxy
+    formatProxy,
+    getRandomArbitrary
 } = require('../../utils/tools.js');
+const config = require('../../config/config.json');
 
 class Monitor extends events {
     constructor(site) {
         super();
 
+        this.previousProducts = [];
+        this.currentProducts = [];
+
         this.site = new URL(site).origin;
+
+        this.initMonitor();
+    }
+
+    compare = async (one, two) => {
+        return _.reject(one, _.partial(_.findWhere, two, _));
     }
 
     initMonitor = async () => {
         let response;
 
         try {
-            
+            response = await request.get({
+                url: this.site + '/products.json',
+                json: true,
+                qs: {
+                    limit: getRandomArbitrary(250, 9999)
+                }
+            })
+
+            this.previousProducts = response.body.products;
         } catch (initError) {
-            
+            console.error(`INIT ERR: ${initError.message}`);
+            await sleep(5000);
+            return this.initMonitor();
         }
+
+        this.monitorLoop();
     }
 
     monitorLoop = async () => {
+        let response;
 
+        try {
+            response = await request.get({
+                url: this.site + '/products.json',
+                json: true,
+                qs: {
+                    limit: getRandomArbitrary(250, 9999)
+                }
+            })
+
+            this.currentProducts = response.body.products;
+        } catch (monitorError) {
+            console.error(`MON ERR: ${monitorError.message}`);
+            await sleep(5000);
+            return this.monitorLoop();
+        }
+
+        await sleep(config.delay);
+        return this.monitorLoop();
     }
 }
 
