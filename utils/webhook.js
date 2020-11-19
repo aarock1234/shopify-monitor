@@ -22,8 +22,8 @@ module.exports = {
                     type: 'rich',
                     fields: productDetails.restockedVariants.map((variant) => {
                         return {
-                            name: `${variant.title}: ${(variant.inventory_quantity) ? variant.inventory_quantity : '1+'} Stock`,
-                            value: `[ATC](${productDetails.site}/cart/${variant.id}:1)`,
+                            name: (variant.available) ? `${variant.title}: ${(variant.inventory_quantity) ? variant.inventory_quantity : '1+'} Stock` : `${variant.title}: Coming Soon`,
+                            value: (variant.available) ? `[ATC](${productDetails.site}/cart/${variant.id}:1)` : `${variant.title}: ${variant.id}`,
                             inline: true
                         }
                     }),
