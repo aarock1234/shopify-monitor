@@ -29,7 +29,7 @@ sites.forEach(site => {
         for (let i = 0; i < webhooks.length; i++) {
             sendWebhook(webhooks[i], 1305395, 'New Product', productDetails);
         }
-        console.log('New Product @ ' + restockDetails.site + ': ' + productDetails.product.title)
+        console.log('New Product @ ' + productDetails.site + ': ' + productDetails.product.title)
     });
     
     currentMonitor.on('restockedProduct', restockDetails => {
