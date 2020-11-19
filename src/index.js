@@ -1,5 +1,5 @@
 const Monitor = require('./class/monitor.js');
-const { sendWebhook } = require('../utils/tools.js');
+const { sendWebhook } = require('../utils/webhook.js');
 
 const fs = require('fs');
 
@@ -20,17 +20,19 @@ sites.forEach(site => {
         proxies
     });
 
+    console.log('Monitor Started for ' + site);
+
     currentMonitor.on('newProduct', productDetails => {
         for (let i = 0; i < webhooks.length; i++) {
-            //sendWebhook(webhooks[i], 1305395, 'New Product', productDetails);
+            sendWebhook(webhooks[i], 1305395, 'New Product', productDetails);
         }
-        console.log('NEW PRODUCT: ' + productDetails.product.title)
+        console.log('New Product @ ' + restockDetails.site + ': ' + productDetails.product.title)
     });
     
     currentMonitor.on('restockedProduct', restockDetails => {
         for (let i = 0; i < webhooks.length; i++) {
-            //sendWebhook(webhooks[i], 242172, 'Product Restock', restockDetails);
+            sendWebhook(webhooks[i], 242172, 'Product Restock', restockDetails);
         }
-        console.log('PRODUCT RESTOCK: ' + restockDetails.product.title)
+        console.log('Restock @ ' + restockDetails.site + ': ' + restockDetails.product.title)
     });
 })
