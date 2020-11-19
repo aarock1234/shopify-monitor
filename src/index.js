@@ -17,16 +17,16 @@ fs.readFileSync(__dirname + '/../config/webhooks.txt', 'utf-8')
 sites.forEach(site => {
     const currentMonitor = new Monitor(site);
 
-    currentMonitor.on('addedProduct', script => {
+    currentMonitor.on('newProduct', productDetails => {
         for (let i = 0; i < webhooks.length; i++) {
-            sendWebhook(webhooks[i], 1305395, 'New Product', script);
+            sendWebhook(webhooks[i], 1305395, 'New Product', productDetails);
         }
         console.log('New Script')
     });
     
-    currentMonitor.on('restockedProduct', script => {
+    currentMonitor.on('restockedProduct', restockDetails => {
         for (let i = 0; i < webhooks.length; i++) {
-            sendWebhook(webhooks[i], 242172, 'Product Restock', script);
+            sendWebhook(webhooks[i], 242172, 'Product Restock', restockDetails);
         }
         console.log('Script Removed')
     });

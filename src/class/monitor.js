@@ -79,6 +79,30 @@ class Monitor extends events {
             })
 
             this.currentProducts = response.body.products;
+            let _currentProducts = this.currentProducts;
+
+            this.previousProducts.forEach(product => {
+                // 1: 1, 2: 1, 3: 1
+                // 1: 1, 2: 1
+                let matchedProductIndex = _currentProducts.findIndex((_product) => _product.id == product.id);
+                let matchedProduct = _currentProducts[matchedProductIndex];
+
+                if (matchedProduct && product.updated_at != matchedProduct.updated_at) {
+                    _currentProducts.splice(matchedProductIndex, 1);
+                    this.checkRestocks(matchedProduct);
+                }
+            });
+
+            if (this.currentProducts.length) {
+                let productDetails = {
+                    matchedProduct,
+                    restockedVariants: matchedProduct.variants
+                }
+
+                this.emit('newProduct', productDetails);
+            }
+
+            this.previousProducts = this.currentProducts;
         } catch (monitorError) {
             console.error(`MON ERR: ${monitorError.message}`);
             await sleep(5000);
@@ -87,6 +111,23 @@ class Monitor extends events {
 
         await sleep(config.delay);
         return this.monitorLoop();
+    }
+
+    checkRestocks = async (product) => {
+        let restockDetails = {
+            product,
+            restockedVariants: []
+        }
+
+        product.variants.forEach((variant) => {
+            if (variant.updated_at == product.updated_at && variant.available) {
+                restockDetails.restockedVariants.push(variant);
+            }
+        })
+
+        if (restockDetails.restockedVariants.length) {
+            this.emit('restockedProduct', restockDetails);
+        }
     }
 }
 
