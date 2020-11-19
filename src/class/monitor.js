@@ -137,7 +137,6 @@ class Monitor extends events {
     }
 
     checkRestocks = async (product, oldProduct) => {
-        console.log(product.title);
         let restockDetails = {
             site: this.site,
             product,
