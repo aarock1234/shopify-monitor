@@ -29,19 +29,21 @@ const {
 const config = require('../../config/config.json');
 
 class Monitor extends events {
-    constructor(site) {
+    constructor(props) {
         super();
+
+        Object.keys(props).forEach((key) => this[key] = props[key]);
 
         this.previousProducts = [];
         this.currentProducts = [];
 
-        this.site = new URL(site).origin;
+        this.site = new URL(this.site).origin;
 
         this.initMonitor();
     }
 
-    compare = async (one, two) => {
-        return _.reject(one, _.partial(_.findWhere, two, _));
+    randomProxy = () => {
+        return formatProxy(this.proxies[Math.floor(Math.random() * this.proxies.length)]);
     }
 
     initMonitor = async () => {
@@ -51,6 +53,7 @@ class Monitor extends events {
             response = await request.get({
                 url: this.site + '/products.json',
                 json: true,
+                proxy: this.randomProxy(),
                 qs: {
                     limit: getRandomArbitrary(250, 9999)
                 }
@@ -63,54 +66,63 @@ class Monitor extends events {
             return this.initMonitor();
         }
 
-        this.monitorLoop();
+        this.monitorLoop(1);
     }
 
-    monitorLoop = async () => {
+    monitorLoop = async (m) => {
+        console.log('Monitor Loop ' + m);
+
         let response;
 
         try {
             response = await request.get({
                 url: this.site + '/products.json',
                 json: true,
+                proxy: this.randomProxy(),
                 qs: {
                     limit: getRandomArbitrary(250, 9999)
                 }
             })
 
             this.currentProducts = response.body.products;
-            let _currentProducts = this.currentProducts;
+            let _currentProducts = [ ...this.currentProducts ];
+
+            let matchedProductIndex, matchedProduct;
 
             this.previousProducts.forEach(product => {
                 // 1: 1, 2: 1, 3: 1
                 // 1: 1, 2: 1
-                let matchedProductIndex = _currentProducts.findIndex((_product) => _product.id == product.id);
-                let matchedProduct = _currentProducts[matchedProductIndex];
+                matchedProductIndex = _currentProducts.findIndex((_product) => _product.id == product.id);
+                matchedProduct = _currentProducts[matchedProductIndex];
 
                 if (matchedProduct && product.updated_at != matchedProduct.updated_at) {
-                    _currentProducts.splice(matchedProductIndex, 1);
-                    this.checkRestocks(matchedProduct);
+                    this.checkRestocks(this.currentProducts[matchedProductIndex]);
                 }
+
+                if (matchedProduct) _currentProducts.splice(matchedProductIndex, 1);
             });
 
-            if (this.currentProducts.length) {
-                let productDetails = {
-                    matchedProduct,
-                    restockedVariants: matchedProduct.variants
-                }
-
-                this.emit('newProduct', productDetails);
+            if (_currentProducts.length) {
+                _currentProducts.forEach((product) => {
+                    let productDetails = {
+                        product: product,
+                        restockedVariants: product.variants
+                    }
+                    // @DEBUG: console.log(productDetails);
+                    this.emit('newProduct', productDetails);
+                })
             }
 
-            this.previousProducts = this.currentProducts;
+            this.previousProducts = [ ...this.currentProducts ];
         } catch (monitorError) {
+            console.error(monitorError)
             console.error(`MON ERR: ${monitorError.message}`);
             await sleep(5000);
             return this.monitorLoop();
         }
 
         await sleep(config.delay);
-        return this.monitorLoop();
+        return this.monitorLoop(++m);
     }
 
     checkRestocks = async (product) => {
@@ -126,6 +138,7 @@ class Monitor extends events {
         })
 
         if (restockDetails.restockedVariants.length) {
+            // @DEBUG: console.log(restockDetails);
             this.emit('restockedProduct', restockDetails);
         }
     }

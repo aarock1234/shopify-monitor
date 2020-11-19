@@ -15,19 +15,22 @@ fs.readFileSync(__dirname + '/../config/webhooks.txt', 'utf-8')
     .split(/\r?\n/).forEach(line => webhooks.push(line));
 
 sites.forEach(site => {
-    const currentMonitor = new Monitor(site);
+    const currentMonitor = new Monitor({
+        site,
+        proxies
+    });
 
     currentMonitor.on('newProduct', productDetails => {
         for (let i = 0; i < webhooks.length; i++) {
-            sendWebhook(webhooks[i], 1305395, 'New Product', productDetails);
+            //sendWebhook(webhooks[i], 1305395, 'New Product', productDetails);
         }
-        console.log('New Script')
+        console.log('NEW PRODUCT: ' + productDetails.product.title)
     });
     
     currentMonitor.on('restockedProduct', restockDetails => {
         for (let i = 0; i < webhooks.length; i++) {
-            sendWebhook(webhooks[i], 242172, 'Product Restock', restockDetails);
+            //sendWebhook(webhooks[i], 242172, 'Product Restock', restockDetails);
         }
-        console.log('Script Removed')
+        console.log('PRODUCT RESTOCK: ' + restockDetails.product.title)
     });
 })
