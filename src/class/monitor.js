@@ -56,7 +56,7 @@ class Monitor extends events {
             response = await request.get({
                 url: this.site + '/products.json',
                 json: true,
-                followAllRedirects: true,
+                followRedirect: true,
                 proxy: this.randomProxy(),
                 qs: {
                     limit: getRandomArbitrary(250, 9999)
@@ -84,7 +84,7 @@ class Monitor extends events {
             response = await request.get({
                 url: this.site + '/products.json',
                 json: true,
-                followAllRedirects: true,
+                followRedirect: true,
                 proxy: this.randomProxy(),
                 qs: {
                     limit: getRandomArbitrary(250, 9999)
@@ -153,7 +153,7 @@ class Monitor extends events {
 
         if (restockDetails.restockedVariants.length) {
             // @DEBUG: console.log(restockDetails);
-            this.emit('restockedProduct',   );
+            this.emit('restockedProduct', restockDetails);
         }
     }
 }
