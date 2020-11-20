@@ -56,6 +56,7 @@ class Monitor extends events {
             response = await request.get({
                 url: this.site + '/products.json',
                 json: true,
+                followAllRedirects: true,
                 proxy: this.randomProxy(),
                 qs: {
                     limit: getRandomArbitrary(250, 9999)
@@ -68,7 +69,7 @@ class Monitor extends events {
 
             this.previousProducts = response.body.products;
         } catch (initError) {
-            console.error(`INIT ERR: ${initError.message}`);
+            console.error(`INIT ERR @ ${this.site}: ${initError.message}`);
             await sleep(config.delay);
             return this.initMonitor();
         }
@@ -83,6 +84,7 @@ class Monitor extends events {
             response = await request.get({
                 url: this.site + '/products.json',
                 json: true,
+                followAllRedirects: true,
                 proxy: this.randomProxy(),
                 qs: {
                     limit: getRandomArbitrary(250, 9999)
@@ -127,7 +129,7 @@ class Monitor extends events {
 
             this.previousProducts = [ ...this.currentProducts ];
         } catch (monitorError) {
-            console.error(`MON ERR: ${monitorError.message}`);
+            console.error(`MON ERR @ ${this.site}: ${monitorError.message}`);
             await sleep(config.delay);
             return this.monitorLoop();
         }
@@ -151,7 +153,7 @@ class Monitor extends events {
 
         if (restockDetails.restockedVariants.length) {
             // @DEBUG: console.log(restockDetails);
-            this.emit('restockedProduct', restockDetails);
+            this.emit('restockedProduct',   );
         }
     }
 }
