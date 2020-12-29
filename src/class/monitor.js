@@ -1,11 +1,17 @@
 "use strict";
 
-const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36';
+const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36';
 const safeHeaders = {
+    'pragma': 'no-cache',
+    'cache-control': 'no-cache',
+    'upgrade-insecure-requests': '1',
+    'user-agent': userAgent,
     'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-    'accept-encoding': 'gzip, deflate, br',
-    'accept-language': 'en-US,en;q=0.9',
-    'user-agent': userAgent
+    'sec-fetch-site': 'none',
+    'sec-fetch-mode': 'navigate',
+    'sec-fetch-user': '?1',
+    'sec-fetch-dest': 'document',
+    'accept-language': 'en-US,en;q=0.9'
 };
 
 const request = require('request-promise').defaults({
@@ -148,6 +154,7 @@ class Monitor extends events {
         product.variants.forEach((variant) => {
             if (variant.updated_at == product.updated_at && variant.available && !oldProduct.variants.find((_variant) => _variant.id == variant.id).available) {
                 restockDetails.restockedVariants.push(variant);
+                console.log(restockDetails.restockedVariants);
             }
         })
 
