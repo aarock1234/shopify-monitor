@@ -22,7 +22,6 @@ const request = require('request-promise').defaults({
     followRedirect: false,
     headers: safeHeaders
 });
-const { URL: parse } = require('url');
 const events = require('events');
 require('console-stamp')(console, 'HH:MM:ss.l');
 
