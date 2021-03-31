@@ -69,7 +69,7 @@ class Monitor extends events {
                 }
             })
 
-            if (new URL(response.request.uri.href).pathname == '/password') {
+            if (response.statusCode == 401) {
                 throw new Error('Password up on ' + this.site);
             }
 
@@ -97,8 +97,8 @@ class Monitor extends events {
                 }
             })
 
-            if (new URL(response.request.uri.href).pathname == '/password') {
-                throw new Error('Password up on' + this.site);
+            if (response.statusCode == 401) {
+                throw new Error('Password up on ' + this.site);
             }
 
             this.currentProducts = response.body.products;
@@ -152,9 +152,9 @@ class Monitor extends events {
         }
 
         product.variants.forEach((variant) => {
-            if (variant.updated_at == product.updated_at && variant.available && !oldProduct.variants.find((_variant) => _variant.id == variant.id).available) {
+            if (variant.available && !oldProduct.variants.find((_variant) => _variant.id == variant.id).available) {
                 restockDetails.restockedVariants.push(variant);
-                console.log(restockDetails.restockedVariants);
+                // @DEBUG: console.log(restockDetails.restockedVariants);
             }
         })
 

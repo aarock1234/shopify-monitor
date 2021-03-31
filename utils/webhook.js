@@ -13,7 +13,7 @@ module.exports = {
                     title: productDetails.product.title,
                     url: `${productDetails.site}/products/${productDetails.product.handle}`,
                     thumbnail: {
-                        "url": productDetails.product.images[0].src
+                        "url": productDetails.product.images[0] ? productDetails.product.images[0].src : 'https://i.imgur.com/NO25iZV.png'
                     },
                     footer: {
                         icon_url: "https://cdn.iconscout.com/icon/free/png-256/shopify-226579.png",
@@ -22,17 +22,17 @@ module.exports = {
                     type: 'rich',
                     fields: productDetails.restockedVariants.map((variant) => {
                         return {
-                            name: (variant.available) ? `${variant.title}: ${(variant.inventory_quantity) ? variant.inventory_quantity : '1+'} Stock` : `${variant.title}: Coming Soon`,
-                            value: (variant.available) ? `[ATC](${productDetails.site}/cart/${variant.id}:1)` : `${variant.title}: ${variant.id}`,
+                            name: (variant.available) ? `${variant.title}: ${(variant.inventory_quantity) ? variant.inventory_quantity : '1+'} Stock` : `${variant.title}: OOS`,
+                            value: (variant.available) ? `[ATC](${productDetails.site}/cart/${variant.id}:1)` : `${variant.id}`,
                             inline: true
                         }
                     }),
                     timestamp: new Date().toISOString()
                 }]
             }
-            console.log(embed);
+            // @DEBUG: console.log(embed);
             
-            let response = await request.post({
+            request.post({
                 url: webhookURL,
                 followAllRedirects: true,
                 simple: false,
