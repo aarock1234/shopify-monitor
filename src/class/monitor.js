@@ -170,13 +170,12 @@ class Monitor extends events {
         }
     }
 
-    productContainsKeywords = async (product) => {
-        this.keywords.forEach((keyword) => {
-            console.log(keyword, product.handle);
-            if (product.handle.includes(keyword)) {
+    productContainsKeywords = (product) => {
+        for (var i = 0; i < this.keywords.length; i++) {
+            if (product.handle.indexOf(this.keywords[i]) != -1) {
                 return true;
             }
-        });
+        };
         return false;
     }
 }
