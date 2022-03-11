@@ -83,8 +83,7 @@ module.exports = {
         if (keywords === null)
             return [];
         const lowerCaseKeywords = [];
-        const array = keywords.split(",");
-        array.forEach(async keyword => {
+        keywords.forEach(async keyword => {
             if (keyword !== "" && keyword !== " " && keyword !== undefined) {
                 lowerCaseKeywords.push(keyword.toLowerCase().trim());
             };

@@ -1,26 +1,32 @@
 const Monitor = require('./class/monitor.js');
 const { sendWebhook } = require('../utils/webhook.js');
-
 const fs = require('fs');
+const { formatKeywords } = require('../utils/tools.js');
 
-let proxies = [],
-    sites = [],
-    webhooks = [];
+function readFiles(filePath) {
+    fileList = []
+    if (filePath.includes('webhooks')) {
+        fs.readFileSync(__dirname + filePath, 'utf-8').split(/\r?\n/).forEach(line => {
+            line = line.replace(/\s/g, '');
+            if (line != '') fileList.push(line);
+        });    
+    } else {
+        fs.readFileSync(__dirname + filePath, 'utf-8')
+        .split(/\r?\n/).forEach(line => fileList.push(line));
+    }
+    return fileList
+}
 
-fs.readFileSync(__dirname + '/../config/proxies.txt', 'utf-8')
-    .split(/\r?\n/).forEach(line => proxies.push(line));
-fs.readFileSync(__dirname + '/../config/sites.txt', 'utf-8')
-    .split(/\r?\n/).forEach(line => sites.push(line));
-fs.readFileSync(__dirname + '/../config/webhooks.txt', 'utf-8')
-    .split(/\r?\n/).forEach(line => {
-        line = line.replace(/\s/g, '');
-        if (line != '') webhooks.push(line);
-    });
+let proxies = readFiles('/../config/proxies.txt'),
+    sites = readFiles('/../config/sites.txt'),
+    webhooks = readFiles('/../config/webhooks.txt'),
+    keywords = formatKeywords(readFiles('/../config/keywords.txt'));
 
 sites.forEach(site => {
     const currentMonitor = new Monitor({
         site,
-        proxies
+        proxies,
+        keywords
     });
 
     console.log('Monitor Started for ' + site);

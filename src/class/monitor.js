@@ -98,6 +98,8 @@ class Monitor extends events {
 
             if (response.statusCode == 401) {
                 throw new Error('Password up on ' + this.site);
+            } else if (response.statusCode == 430) {
+                throw new Error(`Temp ban on ${this.site}`)
             }
 
             this.currentProducts = response.body.products;
@@ -108,7 +110,6 @@ class Monitor extends events {
             this.previousProducts.forEach(product => {
                 matchedProductIndex = this.currentProducts.findIndex((_product) => _product.id == product.id);
                 matchedProduct = this.currentProducts[matchedProductIndex];
-
                 if (matchedProduct && product.updated_at != matchedProduct.updated_at) {
                     this.checkRestocks(this.currentProducts[matchedProductIndex], product);
                 }
@@ -127,8 +128,11 @@ class Monitor extends events {
                         product: product,
                         restockedVariants: product.variants
                     }
-                    // @DEBUG: console.log(productDetails);
-                    this.emit('newProduct', productDetails);
+                    // @DEBUG: 
+                    // console.log(productDetails);
+                    if (this.productContainsKeywords(product)) {
+                        this.emit('newProduct', productDetails);
+                    }
                 })
             }
 
@@ -149,18 +153,31 @@ class Monitor extends events {
             product,
             restockedVariants: []
         }
-
-        product.variants.forEach((variant) => {
-            if (variant.available && !oldProduct.variants.find((_variant) => _variant.id == variant.id).available) {
-                restockDetails.restockedVariants.push(variant);
-                // @DEBUG: console.log(restockDetails.restockedVariants);
+        if (this.productContainsKeywords(product)) {
+            product.variants.forEach((variant) => {
+                if (variant.available && !oldProduct.variants.find((_variant) => _variant.id == variant.id).available) {
+                    restockDetails.restockedVariants.push(variant);
+                    // @DEBUG:
+                    // console.log(restockDetails.restockedVariants);
+                }
+            })
+    
+            if (restockDetails.restockedVariants.length) {
+                // @DEBUG: 
+                // console.log(restockDetails);
+                this.emit('restockedProduct', restockDetails);
             }
-        })
-
-        if (restockDetails.restockedVariants.length) {
-            // @DEBUG: console.log(restockDetails);
-            this.emit('restockedProduct', restockDetails);
         }
+    }
+
+    productContainsKeywords = async (product) => {
+        this.keywords.forEach((keyword) => {
+            console.log(keyword, product.handle);
+            if (product.handle.includes(keyword)) {
+                return true;
+            }
+        });
+        return false;
     }
 }
 
